@@ -1,5 +1,8 @@
 /** Database setup for BizTime. */
 
+
+// db.js file
+
 const { Client } = require('pg');
 
 const DB_URI = (process.env.NODE_ENV === "Test")
