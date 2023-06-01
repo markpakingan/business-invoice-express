@@ -49,6 +49,51 @@ router.post("/", async (req, res, next)=>{
     }
 })
 
+router.patch("/:code", async (req, res, next) => {
 
+    try{
+        
+        if("code" in req.body){
+            throw new ExpressError("Updating 'code' is not allowed", 400)
+        }
+
+        const { name, description} = req.body;
+
+        const result = await db.query(
+            `UPDATE companies SET name= $1, description = $2 WHERE code = $3
+            RETURNING code, name, description`, 
+            [name, description, req.params.code]
+        );
+
+        if (result.rows.length === 0){
+            throw new ExpressError(`There is no company with code of '${req.params.id}`, 404)
+        }
+
+        return res.json({ companies: result.rows[0]});
+
+    } catch (err) {
+        return next(err)
+    }
+
+
+})
+
+
+router.delete("/:code", async(req, res, next)=>{
+    try {
+        const result = await db.query(
+            `DELETE FROM companies WHERE code = $1 RETURNING code`, [req.params.code]
+        );
+
+        if (result.rows.length === 0){
+            throw new ExpressError(`There is no company with code "${req.params.code}"`, 404);
+        }
+
+        return res.json({ message: "company deleted"});
+
+    } catch (err) {
+        return next(err)
+    }
+})
 
 module.exports = router;
