@@ -1,3 +1,5 @@
+-- this is the data.sql file
+
 \c biztime
 
 DROP TABLE IF EXISTS invoices;
