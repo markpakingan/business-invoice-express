@@ -59,21 +59,58 @@ router.post("/", async(req, res, next)=> {
 })
 
 
-router.patch("/:id", async (req, res, next)=>{
+// router.patch("/:id", async (req, res, next)=>{
     
-    try{x
+//     try{
         
-        if  ("id" in req.body) {
+//         if  ("id" in req.body) {
+//             throw new ExpressError("Not allowed", 400);
+//         }
+
+//         const {amt, paid, paid_date} = req.body;
+
+//         const result = await db.query("UPDATE invoices SET amt = $1, paid = $2, paid_date = CASE WHEN $2 THEN $3 ELSE NULL END WHERE id = $4 RETURNING id, amt, paid, paid_date", 
+//         [amt, paid, paid ? new Date() : null, req.params.id]);
+
+
+//         if (result.rows.length === 0){
+//             throw new ExpressError(`There is no invoice with id of "${req.params.id}"`, 404)};
+        
+//         res.json({ invoices: result.rows[0] });
+//     } catch(err){
+//         return next(err)
+//     }
+// })
+
+router.patch("/:id", async (req, res, next) => {
+    try {
+        if ("id" in req.body) {
             throw new ExpressError("Not allowed", 400);
         }
 
-        const result = await db.query("UPDATE invoices SET amt= $1 WHERE id = $2 RETURNING id, amt", [req.body.amt, req.params.id]
-             );
+        const { amt, paid } = req.body;
 
-    } catch(err){
-        return next(err)
+        let paid_date = null;
+        if (paid) {
+            // If paying unpaid invoice, set paid_date to today
+            paid_date = new Date();
+        }
+
+        const result = await db.query(
+            "UPDATE invoices SET amt = $1, paid = $2, paid_date = CASE WHEN $2 THEN $3::date ELSE NULL END WHERE id = $4 RETURNING id, amt, paid, paid_date",
+            [amt, paid, paid_date, req.params.id]
+        );
+
+        if (result.rows.length === 0) {
+            throw new ExpressError(`There is no invoice with id of "${req.params.id}"`, 404);
+        }
+
+        res.json({ invoice: result.rows[0] });
+    } catch (err) {
+        return next(err);
     }
-})
+});
+
 
 router.delete("/:id", async (req, res, next)=>{
     try{
