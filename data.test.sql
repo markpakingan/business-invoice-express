@@ -1,6 +1,6 @@
--- this is the data.sql file
+-- this is the data.test.sql file
 
-\c biztime;
+\c biztime_test;
 
 DROP TABLE IF EXISTS invoices;
 DROP TABLE IF EXISTS companies;
